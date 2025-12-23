@@ -1,0 +1,395 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Kasir Kamar Final</title>
+<style>
+/* ===== UMUM ===== */
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background: #f5f6fa;
+    color: #2c3e50;
+    margin: 0;
+    padding: 0;
+    line-height: 1.5;
+}
+
+/* ===== LAYOUT ===== */
+.container {
+    display: flex;
+    height: 100vh;
+}
+
+.sidebar {
+    width: 200px;
+    background: linear-gradient(180deg, #2c3e50 0%, #4b6584 100%);
+    color: white;
+    padding-top: 20px;
+    box-shadow: 2px 0 8px rgba(0,0,0,0.2);
+    border-right: 1px solid #ddd;
+    display: flex;
+    flex-direction: column;
+    transition: all 0.3s ease;
+}
+
+.sidebar button {
+    width: 100%;
+    padding: 14px 20px;
+    border: none;
+    background: none;
+    color: white;
+    text-align: left;
+    cursor: pointer;
+    font-weight: 600;
+    font-size: 15px;
+    border-radius: 6px;
+    margin: 4px 0;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    transition: all 0.3s ease;
+}
+
+.sidebar button:hover,
+.sidebar button.active {
+    background: #1abc9c;
+    color: white;
+    transform: translateX(5px);
+    box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+}
+
+.content {
+    flex: 1;
+    padding: 20px;
+    overflow: auto;
+}
+
+/* ===== TABEL ===== */
+table {
+    border-collapse: collapse;
+    width: 100%;
+    table-layout: fixed;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+}
+
+th, td {
+    border: 1px solid #ddd;
+    padding: 8px;
+    text-align: center;
+}
+
+tbody tr:nth-child(even) {
+    background: #f7f5f5;
+}
+
+tbody tr:hover {
+    background: #e0f7fa;
+}
+
+th {
+    background: #afacac;
+}
+
+.no { width: 5%; }
+.room { width: 22%; }
+.same { width: 18.25%; }
+
+td[contenteditable] {
+    cursor: text;
+}
+
+/* ===== SMALL TEXT ===== */
+.small {
+    font-size: 12px;
+    color: #555;
+    margin-bottom: 10px;
+}
+
+/* ===== BUTTON ===== */
+button.action {
+    padding: 8px 14px;
+    margin-top: 10px;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-weight: bold;
+    transition: 0.3s;
+    color: white;
+}
+
+button.action.add { background: #2ecc71; }
+button.action.remove { background: #e74c3c; }
+button.action.finish { background: #3498db; }
+
+button.action:hover { opacity: 0.8; }
+
+/* ===== TOTAL AREA ===== */
+#totalArea {
+    padding: 10px;
+    background: #f1c40f;
+    color: #2c3e50;
+    font-weight: bold;
+    border-radius: 6px;
+    margin-top: 10px;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+}
+
+/* ===== RIWAYAT ===== */
+.history-item {
+    border: 1px solid #ccc;
+    padding: 10px;
+    margin-bottom: 8px;
+    cursor: pointer;
+}
+
+.history-item:hover {
+    background: #f5f5f5;
+}
+
+tfoot td {
+    font-weight: bold;
+    background: #818181;
+}
+
+/* ===== RESPONSIVE ===== */
+/* Tablet */
+@media (max-width: 1024px) and (min-width: 769px) {
+    .container { flex-direction: column; }
+    .sidebar {
+        width: 100%;
+        flex-direction: row;
+        overflow-x: auto;
+        padding: 10px 0;
+        border-right: none;
+        border-bottom: 1px solid #ddd;
+    }
+    .sidebar button {
+        flex: 1;
+        margin: 0 5px;
+        text-align: center;
+        font-size: 15px;
+        padding: 12px 0;
+    }
+    .content { padding: 15px; }
+    table { display: block; overflow-x: auto; white-space: nowrap; }
+}
+
+/* Handphone */
+@media (max-width: 768px) {
+    .container { flex-direction: column; }
+    .sidebar {
+        width: 100%;
+        flex-direction: row;
+        overflow-x: auto;
+        padding: 10px 0;
+        border-right: none;
+        border-bottom: 1px solid #ddd;
+    }
+    .sidebar button {
+        flex: 1;
+        margin: 0 3px;
+        text-align: center;
+        font-size: 14px;
+        padding: 10px 0;
+    }
+    .content { padding: 10px; }
+    table { display: block; overflow-x: auto; white-space: nowrap; }
+    button.action { padding: 12px 20px; font-size: 16px; }
+    input.deposit { width: 100%; box-sizing: border-box; }
+}
+</style>
+</head>
+<body>
+
+<div class="container">
+
+<!-- SIDEBAR -->
+<div class="sidebar">
+    <button id="btnHome" class="active" onclick="showHome()">🏠 Home</button>
+    <button id="btnHistory" onclick="showHistory()">📜 Riwayat</button>
+</div>
+
+<!-- CONTENT -->
+<div class="content">
+
+<!-- HOME -->
+<div id="homePage">
+    <h2>Data Kamar</h2>
+    <div class="small">
+    <span id="dayName">-</span>,
+    <input type="date" id="dateInput" onchange="updateDay()">
+    <select id="shiftSelect">
+        <option value="Pagi">Pagi</option>
+        <option value="Malam">Malam</option>
+    </select>
+</div>
+
+    <table>
+        <thead>
+            <tr>
+                <th class="no">No</th>
+                <th class="same">Kode</th>
+                <th class="room">Room</th>
+                <th class="same">Price</th>
+                <th class="same">Deposit</th>
+                <th class="same">Ket</th>
+            </tr>
+        </thead>
+        <tbody id="tbody"></tbody>
+        <tfoot>
+            <tr>
+                <td></td>
+                <td></td>
+                <td><strong>TOTAL</strong></td>
+                <td id="totalPrice"></td>
+                <td></td>
+                <td id="totalKet"></td>
+            </tr>
+        </tfoot>
+    </table>
+
+    <button class="action add" onclick="addRow()">➕</button>
+    <button class="action remove" onclick="removeRow()">➖</button>
+    <button class="action finish" onclick="finishData()">SELESAI</button>
+
+    <h4>Total</h4>
+    <div id="totalArea"></div>
+</div>
+
+<!-- HISTORY LIST -->
+<div id="historyPage" style="display:none">
+    <h2>Riwayat</h2>
+    <div id="historyList"></div>
+</div>
+
+<!-- HISTORY DETAIL -->
+<div id="historyDetail" style="display:none"></div>
+
+</div>
+</div>
+
+<!-- LIBRARY HTML2CANVAS -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+
+<script>
+/* ===== FUNGSI JS ASLI TANPA PERUBAHAN ===== */
+let rowNo = 1;
+let historyData = [];
+let systemPrices = new Map();
+
+if(localStorage.getItem("historyData")){
+    historyData = JSON.parse(localStorage.getItem("historyData"));
+}
+
+function formatRupiah(num){return num===0?"0":num.toString().replace(/\B(?=(\d{3})+(?!\d))/g,".");}
+function parseNum(val){return parseInt(val.replace(/\D/g,""))||0;}
+function updateDay(){const date = new Date(document.getElementById("dateInput").value);const days = ["Minggu","Senin","Selasa","Rabu","Kamis","Jumat","Sabtu"];document.getElementById("dayName").textContent = days[date.getDay()];}
+function getBasePrice(room){if(/^A\d+$/i.test(room)){const n=parseInt(room.slice(1));if(n>=1&&n<=11)return 170000;}const r=parseInt(room);if(r>=100&&r<=120)return 295000;if(r>=201&&r<=239)return 230000;if(r>=301&&r<=339)return 190000;return 0;}
+function getDiscountPrice(room){const r=parseInt(room);if(r>=100&&r<=120)return 210000;if(r>=201&&r<=239)return 170000;if(r>=301&&r<=339)return 135000;return getBasePrice(room);}
+function addRow(){const tbody = document.getElementById("tbody");const lastRow = tbody.lastElementChild;let nextCode="";if(lastRow){const lastCode=lastRow.cells[1].textContent.trim();if(!isNaN(lastCode)&&lastCode!==""){nextCode=parseInt(lastCode)+1;}}const tr=document.createElement("tr");tr.innerHTML=`<td class="no">${rowNo}</td><td class="same" contenteditable>${nextCode}</td><td class="room" contenteditable oninput="roomChange(this)"></td><td class="same" contenteditable onblur="autoCorrect(this)"></td><td class="same"><input type="text" class="deposit" oninput="calcKetInput(this)" onblur="this.value=formatRupiah(parseNum(this.value))"></td><td class="same"></td>`;tbody.appendChild(tr);rowNo++;}
+function removeRow(){const tbody=document.getElementById("tbody");if(tbody.rows.length>1){tbody.removeChild(tbody.lastElementChild);rowNo--;calcTotal();}}
+function roomChange(cell){const tr=cell.parentElement;let codeText=cell.textContent.trim().toLowerCase();let roomText=tr.cells[2].textContent.trim();let price=getBasePrice(roomText);if(codeText.includes("sales")){const roomNum=parseInt(roomText);if(roomNum>=100&&roomNum<=120)price=210000;else if(roomNum>=201&&roomNum<=239)price=170000;else if(roomNum>=301&&roomNum<=339)price=135000;else if(/^a\d+$/i.test(roomText))price=170000;}systemPrices.set(tr,price);tr.cells[3].textContent=formatRupiah(price);const depositInput=tr.querySelector("input.deposit");if(depositInput)calcKetInput(depositInput);}
+function ketChange(cell){const tr=cell.parentElement;const ketText=cell.textContent.toLowerCase();const room=tr.cells[2].textContent.trim();let price=getBasePrice(room);if(ketText.includes("sales")&&!/^A/i.test(room))price=getDiscountPrice(room);systemPrices.set(tr,price);tr.cells[3].textContent=formatRupiah(price);const depositInput=tr.querySelector("input.deposit");if(depositInput)calcKetInput(depositInput);}
+function autoCorrect(cell){const tr=cell.parentElement;if(systemPrices.has(tr))cell.textContent=formatRupiah(systemPrices.get(tr));}
+function calcKetInput(input){const tr=input.closest("tr");const deposit=parseNum(input.value);const price=systemPrices.get(tr)||0;const result=deposit-price;tr.cells[5].textContent=result===0?"0":formatRupiah(result);calcTotal();}
+function calcTotal(){let totalPrice=0,totalKet=0;document.querySelectorAll("#tbody tr").forEach(tr=>{totalPrice+=systemPrices.get(tr)||0;totalKet+=parseNum(tr.cells[5].textContent);});document.getElementById("totalPrice").textContent=formatRupiah(totalPrice);document.getElementById("totalKet").textContent=totalKet===0?"0":formatRupiah(totalKet);}
+function finishData() {if (!confirm("Semua data sudah terisi?")) return;const tbody = document.getElementById("tbody");const tableClone = document.createElement("table");tableClone.innerHTML = document.querySelector("table").innerHTML;tableClone.querySelectorAll("input").forEach(input => {input.parentElement.textContent = input.value;});const now = new Date();const day = ["Minggu","Senin","Selasa","Rabu","Kamis","Jumat","Sabtu"][now.getDay()];const date = String(now.getDate()).padStart(2,'0') + '/' + String(now.getMonth()+1).padStart(2,'0') + '/' + now.getFullYear();const time = now.toLocaleTimeString().slice(0,5);const shift = document.getElementById("shiftSelect").value;const newHistory = {day: day,date: date,shift: shift,time: time,tableHTML: tableClone.outerHTML,totalHTML: document.getElementById("totalArea").outerHTML};historyData.push(newHistory);localStorage.setItem("historyData", JSON.stringify(historyData));document.getElementById("dateInput").value = "";document.getElementById("dayName").textContent = "-";if(document.getElementById("shiftSelect")) document.getElementById("shiftSelect").value = "Siang";resetTable();}
+function resetTable(){document.getElementById("tbody").innerHTML="";rowNo=1;systemPrices.clear();addRow();calcTotal();}
+function showHome(){togglePage("homePage");setActive("btnHome");}
+function showHistory(){togglePage("historyPage");setActive("btnHistory");renderHistory();}
+function togglePage(id){["homePage","historyPage","historyDetail"].forEach(p=>document.getElementById(p).style.display="none");document.getElementById(id).style.display="block";}
+function setActive(btn){document.querySelectorAll(".sidebar button").forEach(b=>b.classList.remove("active"));document.getElementById(btn).classList.add("active");}
+
+/* HISTORY VIEW */
+let deleteMode = false;
+let longPressTimer = null;
+
+function renderHistory() {
+    const list = document.getElementById("historyList");
+    list.innerHTML = "";
+    const deleteBtn = document.createElement("button");
+    deleteBtn.textContent = "Hapus Terpilih";
+    deleteBtn.style.marginBottom = "10px";
+    deleteBtn.style.display = deleteMode ? "inline-block" : "none";
+    deleteBtn.onclick = deleteSelectedHistory;
+    list.appendChild(deleteBtn);
+    const cancelBtn = document.createElement("button");
+    cancelBtn.textContent = "Batal";
+    cancelBtn.style.marginLeft = "10px";
+    cancelBtn.style.display = deleteMode ? "inline-block" : "none";
+    cancelBtn.onclick = () => { deleteMode = false; renderHistory(); };
+    list.appendChild(cancelBtn);
+    historyData.forEach((h, i) => {
+        const div = document.createElement("div");
+        div.className = "history-item";
+        div.style.display = "flex";
+        div.style.alignItems = "center";
+        div.style.justifyContent = "space-between";
+        const leftDiv = document.createElement("div");
+        leftDiv.style.display = "flex";
+        leftDiv.style.alignItems = "center";
+        leftDiv.style.gap = "5px";
+        const checkbox = document.createElement("input");
+        checkbox.type = "checkbox";
+        checkbox.dataset.index = i;
+        checkbox.style.display = deleteMode ? "inline-block" : "none";
+        leftDiv.appendChild(checkbox);
+        leftDiv.append(` ${h.shift} | ${h.day} | ${h.date} | ${h.time}`);
+        const detailBtn = document.createElement("button");
+        detailBtn.textContent = "Detail";
+        detailBtn.style.marginLeft = "10px";
+        detailBtn.onclick = () => openHistory(i);
+        div.appendChild(leftDiv);
+        div.appendChild(detailBtn);
+        list.appendChild(div);
+        if (/Mobi|Android/i.test(navigator.userAgent)) {
+            div.addEventListener("touchstart", () => {
+                longPressTimer = setTimeout(() => { deleteMode = true; renderHistory(); }, 800);
+            });
+            div.addEventListener("touchend", () => clearTimeout(longPressTimer));
+        } else {
+            div.addEventListener("dblclick", () => { deleteMode = true; renderHistory(); });
+        }
+    });
+}
+function deleteSelectedHistory() {
+    const checkboxes = document.querySelectorAll("#historyList input[type='checkbox']");
+    const indexesToDelete = [];
+    checkboxes.forEach(cb => { if(cb.checked) indexesToDelete.push(parseInt(cb.dataset.index)); });
+    if(indexesToDelete.length === 0){ alert("Pilih riwayat yang ingin dihapus!"); return; }
+    if(!confirm(`Hapus ${indexesToDelete.length} item riwayat?`)) return;
+    indexesToDelete.sort((a,b) => b-a).forEach(i => historyData.splice(i,1));
+    localStorage.setItem("historyData", JSON.stringify(historyData));
+    deleteMode = false;
+    renderHistory();
+}
+function openHistory(i) {
+    const h = historyData[i];
+    const detailDiv = document.getElementById("historyDetail");
+    detailDiv.innerHTML = `
+        <div id="historySnapshot" style="padding:10px;background:#fff;">
+            <div style="margin-bottom:10px;font-weight:bold;">
+                ${h.shift} | ${h.day} | ${h.date} | ${h.time}
+            </div>
+            ${h.tableHTML}
+            ${h.totalHTML}
+        </div>
+        <button id="downloadBtn" style="margin-top:10px;padding:6px 12px;cursor:pointer;">Download Snapshot</button>
+        <button style="margin-top:10px;padding:6px 12px;cursor:pointer;" onclick="showHistory()">Kembali</button>
+    `;
+    document.getElementById("downloadBtn").onclick = () => {
+        const snapshot = document.getElementById("historySnapshot");
+        html2canvas(snapshot, { scrollY: -window.scrollY, scale: 2 }).then(canvas => {
+            const link = document.createElement("a");
+            link.download = `riwayat-${h.shift}-${h.date}-${h.time}.png`;
+            link.href = canvas.toDataURL("image/png");
+            link.click();
+        });
+    };
+    togglePage("historyDetail");
+}
+addRow();
+</script>
+</body>
+</html>
