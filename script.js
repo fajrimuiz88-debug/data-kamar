@@ -7,6 +7,10 @@ let systemPrices = new Map();
 if(localStorage.getItem("historyData")){
     historyData = JSON.parse(localStorage.getItem("historyData"));
 }
+function closeWelcome() {
+    document.getElementById("welcomeOverlay").style.display = "none";
+}
+
 // ===== POPUP CONFIRM =====
 function showConfirm(message, callback, type = "normal") {
     const box = document.querySelector(".confirm-box");
