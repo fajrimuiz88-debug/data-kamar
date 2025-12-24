@@ -61,7 +61,7 @@ body {
 /* ===== TABEL ===== */
 table {
     border-collapse: collapse;
-    width: 100%;
+    width: auto;
     table-layout: fixed;
     box-shadow: 0 2px 5px rgba(0,0,0,0.1);
 }
@@ -85,7 +85,7 @@ th {
 }
 
 .no { width: 5%; }
-.room { width: 22%; }
+.room { width: 7.5%; }
 .same { width: 18.25%; }
 
 td[contenteditable] {
@@ -280,4 +280,5 @@ tfoot td {
     font-weight: 600;
     border-radius: 8px;
     box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+
 }
