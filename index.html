@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Kasir Kamar Final</title>
+
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<div class="container">
+
+<div class="sidebar">
+    <button id="btnHome" class="active" onclick="showHome()">🏠 Home</button>
+    <button id="btnHistory" onclick="showHistory()">📜 Riwayat</button>
+</div>
+
+<div class="content">
+
+<div id="homePage">
+    <h2>Data Kamar</h2>
+
+    <div class="small">
+        <span id="dayName">-</span>,
+        <input type="date" id="dateInput" onchange="updateDay()">
+        <select id="shiftSelect">
+            <option value="Pagi">Pagi</option>
+            <option value="Malam">Malam</option>
+        </select>
+    </div>
+
+    <table>
+        <thead>
+            <tr>
+                <th class="no">No</th>
+                <th class="same">Kode</th>
+                <th class="room">Room</th>
+                <th class="same">Price</th>
+                <th class="same">Deposit</th>
+                <th class="same">Ket</th>
+                <th class="same">Pengeluaran</th>
+            </tr>
+        </thead>
+        <tbody id="tbody"></tbody>
+        <tfoot>
+            <tr>
+                <td></td>
+                <td></td>
+                <td><b>TOTAL</b></td>
+                <td id="totalPrice"></td>
+                <td></td>
+                <td id="totalKet"></td>
+                <td id="totalPengeluaran"></td>
+            </tr>
+        </tfoot>
+    </table>
+
+    <button class="action add" onclick="addRow()">➕</button>
+    <button class="action remove" onclick="removeRow()">➖</button>
+    <button class="action finish" onclick="finishData()">SELESAI</button>
+
+    <h4>Total</h4>
+    <div id="totalArea"></div>
+</div>
+<div id="noteArea" style="display:none;"></div>
+<div id="historyPage" style="display:none">
+    <h2>Riwayat</h2>
+    <div id="historyList"></div>
+</div>
+
+<div id="historyDetail" style="display:none"></div>
+<div id="confirmOverlay" class="confirm-overlay">
+    <div class="confirm-box">
+        <h3>Konfirmasi</h3>
+        <p id="confirmMessage">Apakah Anda yakin?</p>
+        <div class="confirm-actions">
+            <button class="btn-cancel" onclick="closeConfirm(false)">Batal</button>
+            <button class="btn-ok" onclick="closeConfirm(true)">Ya</button>
+        </div>
+    </div>
+</div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+<script src="script.js"></script>
+</body>
+</html>
