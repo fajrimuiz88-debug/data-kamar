@@ -8,9 +8,13 @@ if(localStorage.getItem("historyData")){
     historyData = JSON.parse(localStorage.getItem("historyData"));
 }
 function closeWelcome() {
-    document.getElementById("welcomeOverlay").style.display = "none";
+    const overlay = document.getElementById("welcomeOverlay");
+    overlay.classList.add("fade-out");
+    overlay.addEventListener("animationend", () => {
+        overlay.style.display = "none";
+        overlay.classList.remove("fade-out");
+    }, { once: true });
 }
-
 // ===== POPUP CONFIRM =====
 function showConfirm(message, callback, type = "normal") {
     const box = document.querySelector(".confirm-box");
@@ -391,3 +395,4 @@ function openHistory(i) {
 }
 function deleteHistory(i){historyData.splice(i,1);localStorage.setItem("historyData",JSON.stringify(historyData));showHistory();}
 addRow();
+
