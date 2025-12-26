@@ -145,35 +145,7 @@ tfoot td {
     background: #818181;
 }
 
-/* ===== RESPONSIVE ===== */
-@media (max-width: 768px) {
-    .container { flex-direction: column; }
 
-    .sidebar {
-        width: 100%;
-        flex-direction: row;
-        overflow-x: auto;
-        padding: 10px 0;
-        border-right: none;
-        border-bottom: 1px solid #ddd;
-    }
-
-    .sidebar button {
-        flex: 1;
-        margin: 0 5px;
-        text-align: center;
-        font-size: 14px;
-        padding: 10px 0;
-    }
-
-    .content { padding: 10px; }
-
-    table { display: block; overflow-x: auto; white-space: nowrap; }
-
-    button.action { padding: 12px 20px; font-size: 16px; }
-
-    input.deposit { width: 100%; box-sizing: border-box; }
-}
 /* ===== POPUP KONFIRMASI ===== */
 .confirm-overlay {
     position: fixed;
@@ -350,5 +322,45 @@ tfoot td {
 .welcome-box button:hover {
     transform: scale(1.05);
     opacity: 0.9;
+}
+@media (max-width: 768px) {
+
+    table {
+        width: 100%;
+        table-layout: fixed;
+    }
+
+    th {
+        font-size: 13px;
+        white-space: nowrap;
+    }
+
+    tbody td:not(.no),
+    tfoot td:not(.no) {
+        font-size: clamp(10px, 3.5vw, 13px);
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
+    td.no {
+        font-size: 13px;
+        white-space: nowrap;
+    }
+
+    td[contenteditable]:focus,
+    td input:focus {
+        font-size: 14px;
+    }
+
+    td input {
+        width: 100%;
+        font-size: inherit;
+        box-sizing: border-box;
+    }
+
+    tfoot td {
+        font-weight: bold;
+    }
 }
 
