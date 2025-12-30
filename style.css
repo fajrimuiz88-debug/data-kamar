@@ -466,3 +466,50 @@ body.snapshot-mode td {
 body.snapshot-mode * {
     transform: none !important;
 }
+@media print {
+
+    body {
+        background: white;
+        overflow: visible;
+    }
+
+    .sidebar,
+    button,
+    .confirm-overlay,
+    .welcome-overlay {
+        display: none !important;
+    }
+
+    .content {
+        padding: 0;
+    }
+
+    table {
+        display: table;
+        width: 100%;
+        min-width: unset;
+        border-collapse: collapse;
+    }
+
+    thead th {
+        position: static;
+        background: #ddd;
+        color: #000;
+    }
+
+    th, td {
+        font-size: 12px;
+        white-space: normal;
+        word-break: break-word;
+        padding: 6px;
+    }
+
+    tr {
+        page-break-inside: avoid;
+    }
+
+    @page {
+        size: A4 landscape;
+        margin: 12mm;
+    }
+}
