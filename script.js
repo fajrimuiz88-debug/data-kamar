@@ -7,8 +7,18 @@ let systemPrices = new Map();
 if(localStorage.getItem("historyData")){
     historyData = JSON.parse(localStorage.getItem("historyData"));
 }
+window.addEventListener("load", () => {
+    const welcome = document.getElementById("welcomeOverlay");
+
+    if (localStorage.getItem("welcomeShown")) {
+        // sudah pernah masuk → langsung sembunyikan
+        welcome.style.display = "none";
+    }
+});
 function closeWelcome() {
     const overlay = document.getElementById("welcomeOverlay");
+    localStorage.setItem("welcomeShown", "yes");
+
     overlay.classList.add("fade-out");
     overlay.addEventListener("animationend", () => {
         overlay.style.display = "none";
@@ -46,6 +56,23 @@ function showInfo(message) {
 
     confirmCallback = () => {};
 }
+function saveDraft() {
+    const tbody = document.getElementById("tbody");
+    const draftRows = [];
+    tbody.querySelectorAll("tr").forEach(tr => {
+        const row = {
+            kode: tr.cells[1].textContent,
+            room: tr.cells[2].textContent,
+            price: tr.cells[3].textContent,
+            deposit: tr.cells[4].querySelector("input.deposit")?.value || "",
+            ket: tr.cells[5].textContent,
+            pengeluaran: tr.cells[6].querySelector("input.pengeluaran")?.value || ""
+        };
+        draftRows.push(row);
+    });
+    localStorage.setItem("draftData", JSON.stringify(draftRows));
+}
+
 /* UTILS */
 function formatRupiah(num){return num===0?"0":num.toString().replace(/\B(?=(\d{3})+(?!\d))/g,".");}
 function parseNum(val){return parseInt(val.replace(/\D/g,""))||0;}
@@ -93,39 +120,92 @@ function getDiscountPrice(room){
 }
 
 /* TABLE FUNCTIONS */
-function addRow(){
+function addRow() {
     const tbody = document.getElementById("tbody");
     const lastRow = tbody.lastElementChild;
-    let nextCode="";
-    if(lastRow){const lastCode=lastRow.cells[1].textContent.trim();if(!isNaN(lastCode)&&lastCode!==""){nextCode=parseInt(lastCode)+1;}}
-    const tr=document.createElement("tr");
-   tr.innerHTML = `
-    <td class="no">${rowNo}</td>
-    <td class="same" contenteditable>${nextCode}</td>
-    <td class="room" contenteditable oninput="roomChange(this)"></td>
-    <td class="same" contenteditable onblur="autoCorrect(this)"></td>
+    let nextCode = "";
 
-    <!-- Deposit -->
-    <td class="same">
-        <input type="text" class="deposit"
-            oninput="calcKetInput(this)"
-            onblur="this.value=formatRupiah(parseNum(this.value))">
-    </td>
+    if (lastRow) {
+        const lastCode = lastRow.cells[1].textContent.trim();
+        if (!isNaN(lastCode) && lastCode !== "") {
+            nextCode = parseInt(lastCode) + 1;
+        }
+    }
 
-    <!-- Ket (AUTO) -->
-    <td class="same"></td>
+    const tr = document.createElement("tr");
 
-    <!-- Pengeluaran -->
-   <td class="same">
-    <input type="text" class="pengeluaran" oninput="calcTotal()">
-    </td>
+    tr.innerHTML = `
+        <td class="no">${rowNo}</td>
 
-`;
+        <td class="same" contenteditable>
+            ${nextCode}
+        </td>
+
+        <td class="room" contenteditable oninput="roomChange(this)"></td>
+
+        <td class="same" contenteditable onblur="autoCorrect(this)"></td>
+
+        <td class="same">
+            <input
+                type="number"
+                inputmode="numeric"
+                pattern="[0-9]*"
+                class="deposit"
+                oninput="calcKetInput(this)"
+                onblur="this.value = formatRupiah(parseNum(this.value))"
+            >
+        </td>
+
+        <td class="same"></td>
+
+        <td class="same">
+            <input
+                type="text"
+                class="pengeluaran"
+                oninput="calcTotal()"
+            >
+        </td>
+    `;
+
     tbody.appendChild(tr);
     rowNo++;
 }
+function loadDraft() {
+    const draft = localStorage.getItem("draftData");
+    if (!draft) return;
+    const rows = JSON.parse(draft);
+    const tbody = document.getElementById("tbody");
+    tbody.innerHTML = "";
+    rows.forEach((r, index) => {
+        const tr = document.createElement("tr");
+        tr.innerHTML = `
+            <td class="no">${index + 1}</td>
+            <td class="same" contenteditable>${r.kode}</td>
+            <td class="room" contenteditable oninput="roomChange(this)">${r.room}</td>
+            <td class="same" contenteditable onblur="autoCorrect(this)">${r.price}</td>
+            <td class="same">
+                <input type="number" class="deposit" value="${r.deposit}"
+                    oninput="calcKetInput(this)"
+                    onblur="this.value=formatRupiah(parseNum(this.value))"
+                    inputmode="numeric" pattern="[0-9]*" step="1" min="0">
+            </td>
+            <td class="same">${r.ket}</td>
+            <td class="same">
+                <input type="text" class="pengeluaran" value="${r.pengeluaran}" 
+    oninput="calcTotal(); saveDraft()">
+            </td>
+        `;
+        tbody.appendChild(tr);
+        const priceNum = parseNum(r.price);
+        systemPrices.set(tr, priceNum);
+    });
+    calcTotal();
+}
+
 function removeRow(){const tbody=document.getElementById("tbody");if(tbody.rows.length>1){tbody.removeChild(tbody.lastElementChild);rowNo--;calcTotal();}}
-function roomChange(cell){const tr=cell.parentElement;let codeText=cell.textContent.trim().toLowerCase();let roomText=tr.cells[2].textContent.trim();let price=getBasePrice(roomText);if(codeText.includes("sales")){const roomNum=parseInt(roomText);if(roomNum>=100&&roomNum<=120)price=210000;else if(roomNum>=201&&roomNum<=239)price=170000;else if(roomNum>=301&&roomNum<=339)price=135000;else if(/^a\d+$/i.test(roomText))price=170000;}systemPrices.set(tr,price);tr.cells[3].textContent=formatRupiah(price);const depositInput=tr.querySelector("input.deposit");if(depositInput)calcKetInput(depositInput);}
+function roomChange(cell){const tr=cell.parentElement;let codeText=cell.textContent.trim().toLowerCase();let roomText=tr.cells[2].textContent.trim();let price=getBasePrice(roomText);if(codeText.includes("sales")){const roomNum=parseInt(roomText);if(roomNum>=100&&roomNum<=120)price=210000;else if(roomNum>=201&&roomNum<=239)price=170000;else if(roomNum>=301&&roomNum<=339)price=135000;else if(/^a\d+$/i.test(roomText))price=170000;}systemPrices.set(tr,price);tr.cells[3].textContent=formatRupiah(price);const depositInput=tr.querySelector("input.deposit");if(depositInput)calcKetInput(depositInput);
+saveDraft();
+}
 function ketChange(cell){const tr=cell.parentElement;const ketText=cell.textContent.toLowerCase();const room=tr.cells[2].textContent.trim();let price=getBasePrice(room);if(ketText.includes("sales")&&!/^A/i.test(room))price=getDiscountPrice(room);systemPrices.set(tr,price);tr.cells[3].textContent=formatRupiah(price);const depositInput=tr.querySelector("input.deposit");if(depositInput)calcKetInput(depositInput);}
 function autoCorrect(cell){const tr=cell.parentElement;if(systemPrices.has(tr))cell.textContent=formatRupiah(systemPrices.get(tr));}
 function calcKetInput(input){
@@ -141,6 +221,7 @@ function calcKetInput(input){
         result === 0 ? "0" : formatRupiah(result);
 
     calcTotal();
+    saveDraft();
 }
 function calcTotal(){
     let totalPrice = 0;
@@ -233,6 +314,7 @@ function finishData() {
 
         resetTable();
     });
+    localStorage.removeItem("draftData");
 }
 function resetTable(){
     document.getElementById("tbody").innerHTML = "";
@@ -365,34 +447,60 @@ function openHistory(i) {
                 ${h.shift} | ${h.day} | ${h.date} | ${h.time}
             </div>
             ${h.tableHTML}
-            ${h.totalHTML}
+            ${h.totalHTML || ""}
             ${h.noteHTML || ""}
         </div>
-        <button id="downloadBtn"
-            style="margin-top:10px;padding:6px 12px;cursor:pointer;">
-            Download Snapshot
-        </button>
-        <button style="margin-top:10px;padding:6px 12px;cursor:pointer;"
-            onclick="showHistory()">
-            Kembali
-        </button>
+
+        <button id="btnPNG">Download PNG</button>
+        <button id="btnPDF">Download PDF</button>
+        <button id="btnExcel">Download Excel</button>
+        <button onclick="showHistory()">Kembali</button>
     `;
 
-    document.getElementById("downloadBtn").onclick = () => {
-        const snapshot = document.getElementById("historySnapshot");
-        html2canvas(snapshot, {
-            scrollY: -window.scrollY,
-            scale: 2
-        }).then(canvas => {
-            const link = document.createElement("a");
-            link.download = `riwayat-${h.shift}-${h.date}-${h.time}.png`;
-            link.href = canvas.toDataURL("image/png");
-            link.click();
+    document.getElementById("btnPNG").onclick = () => {
+        html2canvas(document.getElementById("historySnapshot"), { scale: 2 })
+        .then(c => {
+            const a = document.createElement("a");
+            a.href = c.toDataURL("image/png");
+            a.download = `riwayat-${h.date}-${h.time}.png`;
+            a.click();
         });
+    };
+
+    document.getElementById("btnPDF").onclick = () => {
+        const pdf = new window.jspdf.jsPDF("p", "mm", "a4");
+        pdf.setFontSize(14);
+        pdf.text(`Riwayat ${h.shift} - ${h.date}`, 14, 15);
+
+        pdf.autoTable({
+            html: "#historySnapshot table",
+            startY: 25,
+            theme: "grid",
+            styles: { fontSize: 9 }
+        });
+
+        pdf.save(`riwayat-${h.date}-${h.time}.pdf`);
+    };
+
+    document.getElementById("btnExcel").onclick = () => {
+        const table = document.querySelector("#historySnapshot table");
+        const wb = XLSX.utils.table_to_book(table, { sheet: "Riwayat" });
+        XLSX.writeFile(wb, `riwayat-${h.date}-${h.time}.xlsx`);
     };
 
     togglePage("historyDetail");
 }
+function downloadPDF() {
+    window.print();
+}
 function deleteHistory(i){historyData.splice(i,1);localStorage.setItem("historyData",JSON.stringify(historyData));showHistory();}
 addRow();
+window.addEventListener("load", () => {
+    loadDraft();
+    if(document.querySelectorAll("#tbody tr").length === 0){
+        addRow();
+    }
+});
+
+
 
