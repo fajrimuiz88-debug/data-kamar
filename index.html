@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Kasir Kamar Final</title>
+<title>Data Kamaar</title>
 
 <link rel="stylesheet" href="style.css">
 </head>
@@ -77,7 +77,22 @@
     <div id="historyList"></div>
 </div>
 
-<div id="historyDetail" style="display:none"></div>
+<div id="historyDetail" style="display:none">
+
+    <div class="history-header">
+        <h3>Detail Transaksi</h3>
+
+        <div class="history-actions">
+            <button class="action add" onclick="downloadSnapshot()">Snapshot</button>
+            <button class="action finish" onclick="downloadPDF()">PDF</button>
+        </div>
+    </div>
+
+    <div class="history-content">
+    </div>
+
+</div>
+
 <div id="confirmOverlay" class="confirm-overlay">
     <div class="confirm-box">
         <h3>Konfirmasi</h3>
@@ -87,10 +102,14 @@
             <button class="btn-ok" onclick="closeConfirm(true)">Ya</button>
         </div>
     </div>
+    
 </div>
 </div>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.28/jspdf.plugin.autotable.min.js"></script>
+<script src="https://cdn.sheetjs.com/xlsx-latest/package/dist/xlsx.full.min.js"></script>
 <script src="script.js"></script>
 </body>
 </html>
